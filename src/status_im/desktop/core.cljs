@@ -7,7 +7,7 @@
             [status-im.ui.components.react :as react]
             [status-im.core :as core]
             [status-im.ui.screens.desktop.views :as desktop-views]
-            [status-im.desktop.deep-links :as deep-links]
+            ;[status-im.desktop.deep-links :as deep-links]
             [status-im.utils.config :as config]))
 
 (defn app-state-change-handler [state]
@@ -29,7 +29,7 @@
      {:component-did-mount (fn [this]
                              (re-frame/dispatch [:set-initial-props (reagent/props this)])
                                         ;(shortcuts/register-default-shortcuts)
-                             (deep-links/add-event-listener))
+                             #_(deep-links/add-event-listener))
       :reagent-render      (fn [_]
                              desktop-views/main)})))
 

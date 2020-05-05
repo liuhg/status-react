@@ -6,6 +6,11 @@
              :refer
              [add-participants-toggle-list contact-toggle-list new-group]]
             [status-im.ui.screens.intro.views :as intro.views]
+            [status-im.ui.screens.group.views :refer [contact-toggle-list
+                                                      new-group
+                                                      add-participants-toggle-list]]
+            [status-im.ui.screens.profile.group-chat.views :refer [group-chat-profile]]
+            ["react-native-desktop-config" :as desktop-config]
             [status-im.ui.screens.multiaccounts.login.views :as login.views]
             [status-im.ui.screens.multiaccounts.views :as multiaccounts.views]
             [status-im.ui.screens.profile.group-chat.views
@@ -21,10 +26,10 @@
                   #_#_version [:get-app-version]]
     {:component-did-mount
      (fn []
-       #_(.getValue rn-dependencies/desktop-config "desktop-alpha-warning-shown-for-version"
-                    #(when-not (= %1 version)
-                       (.setValue ^js rn-dependencies/desktop-config "desktop-alpha-warning-shown-for-version" version)
-                       (utils/show-popup nil (i18n/label :desktop-alpha-release-warning)))))}
+       (.getValue desktop-config "desktop-alpha-warning-shown-for-version"
+                  #(when-not (= %1 version)
+                     (.setValue ^js desktop-config "desktop-alpha-warning-shown-for-version" version)
+                     (utils/show-popup nil (i18n/label :desktop-alpha-release-warning)))))}
 
     (let [view-id (or view-id :intro) ;; TODO some default value
           component (case view-id
