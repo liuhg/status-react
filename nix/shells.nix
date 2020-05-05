@@ -94,6 +94,7 @@ let
     android = targets.mobile.android.shell;
     desktop = targets.desktop.shell;
     linux = targets.desktop.linux.shell;
+    darwin = targets.desktop.macos.shell;
     macos = targets.desktop.macos.shell;
     windows = targets.desktop.macos.shell;
   };
