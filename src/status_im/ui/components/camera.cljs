@@ -24,8 +24,7 @@
       (.then (fn [allowed?] (if allowed? (then) (else))))
       (.catch else)))
 
-(defn camera [props]
-  (reagent/create-element RNCamera (clj->js (merge {:inverted true} props))))
+(def camera (reagent/adapt-react-class RNCamera))
 
 (defn get-qr-code-data [^js code]
   (when-let [data (.-data code)]

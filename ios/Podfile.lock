@@ -244,6 +244,8 @@ PODS:
     - React
   - react-native-camera/RN (3.23.1):
     - React
+  - react-native-cameraroll (1.6.1):
+    - React
   - react-native-image-resizer (1.0.0):
     - React
   - react-native-mail (4.0.0):
@@ -395,6 +397,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-background-timer (from `../node_modules/react-native-background-timer`)
   - react-native-camera (from `../node_modules/react-native-camera`)
+  - "react-native-cameraroll (from `../node_modules/@react-native-community/cameraroll`)"
   - react-native-image-resizer (from `../node_modules/react-native-image-resizer`)
   - react-native-mail (from `../node_modules/react-native-mail`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
@@ -483,6 +486,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-background-timer"
   react-native-camera:
     :path: "../node_modules/react-native-camera"
+  react-native-cameraroll:
+    :path: "../node_modules/@react-native-community/cameraroll"
   react-native-image-resizer:
     :path: "../node_modules/react-native-image-resizer"
   react-native-mail:
@@ -575,6 +580,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
   react-native-background-timer: 1f7d560647b40e6a60b01c452ba29c54bf581fc4
   react-native-camera: 1b52abea404d04e040edb3e74b7c5523c01a3089
+  react-native-cameraroll: 936da257870caa35469828f6310012a34005f694
   react-native-image-resizer: 4516052af6ae0248caf4ccf356caecefe60072d7
   react-native-mail: 7e37dfbe93ff0d4c7df346b738854dbed533e86f
   react-native-netinfo: ddaca8bbb9e6e914b1a23787ccb879bc642931c9
@@ -613,4 +619,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 23557eb8cb46b1c5dd060326fe1873a162394149
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.1

@@ -78,8 +78,11 @@
   [{:keys [db] :as cofx} message-id]
   (let [current-chat-id (:current-chat-id db)]
     (fx/merge cofx
-              {:db (assoc-in db [:chats current-chat-id :metadata :responding-to-message]
-                             {:message-id     message-id})}
+              {:db (-> db
+                       (assoc-in [:chats current-chat-id :metadata :responding-to-message]
+                                 {:message-id     message-id})
+                       (update-in [:chats current-chat-id :metadata]
+                                 dissoc :sending-image))}
               (chat-input-focus :input-ref))))
 
 (fx/defn cancel-message-reply
@@ -90,9 +93,9 @@
               {:db (assoc-in db [:chats current-chat-id :metadata :responding-to-message] nil)}
               (chat-input-focus :input-ref))))
 
-(defn plain-text-message-fx
+(fx/defn send-plain-text-message
   "when not empty, proceed by sending text message"
-  [input-text current-chat-id {:keys [db] :as cofx}]
+  [{:keys [db] :as cofx} input-text current-chat-id]
   (when-not (string/blank? input-text)
     (let [{:keys [message-id]}
           (get-in db [:chats current-chat-id :metadata :responding-to-message])
@@ -114,18 +117,17 @@
 
 (fx/defn send-image
   {:events [:chat.ui/send-image]}
-  [{{:keys [current-chat-id] :as db} :db :as cofx} send-image]
-  (println "SENDING" send-image)
+  [{{:keys [current-chat-id] :as db} :db :as cofx} image-path]
   (fx/merge cofx
-            {:db (chat/set-chat-ui-props db {:send-image-loading? true})}
-            (when-not (string/blank? send-image)
+            {:db (update-in db [:chats current-chat-id :metadata] dissoc :sending-image)}
+            (when-not (string/blank? image-path)
               (chat.message/send-message {:chat-id      current-chat-id
                                           :content-type constants/content-type-image
-                                          :image-path   send-image
+                                          :image-path   image-path
                                           :text         "Update to latest version to see a nice image here!"}))))
 
-(fx/defn send-sticker-fx
-  [{:keys [db] :as cofx} {:keys [hash pack]} current-chat-id]
+(fx/defn send-sticker-message
+  [cofx {:keys [hash pack]} current-chat-id]
   (when-not (string/blank? hash)
     (chat.message/send-message cofx {:chat-id      current-chat-id
                                      :content-type constants/content-type-sticker
@@ -136,16 +138,12 @@
 (fx/defn send-current-message
   "Sends message from current chat input"
   [{{:keys [current-chat-id] :as db} :db :as cofx}]
-  (let [{:keys [input-text]} (get-in db [:chat/inputs current-chat-id])]
-    (plain-text-message-fx input-text current-chat-id cofx)))
-
-(fx/defn send-transaction-result
-  {:events [:chat/send-transaction-result]}
-  [cofx chat-id params result])
-  ;;TODO: should be implemented on status-go side
-  ;;see https://github.com/status-im/team-core/blob/6c3d67d8e8bd8500abe52dab06a59e976ec942d2/rfc-001.md#status-gostatus-react-interface
-
-;; effects
+  (let [{:keys [input-text]} (get-in db [:chat/inputs current-chat-id])
+        uri (get-in db [:chats current-chat-id :metadata :sending-image :uri])]
+    (fx/merge cofx
+              #(when uri
+                 {:chat.ui/prepare-and-send-image uri})
+              (send-plain-text-message input-text current-chat-id))))
 
 (re-frame/reg-fx
  ::focus-rn-component

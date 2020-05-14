@@ -29,6 +29,9 @@
 (def text-class (reagent/adapt-react-class (.-Text react-native)))
 (def text-input-class (reagent/adapt-react-class (.-TextInput react-native)))
 (def image-class (reagent/adapt-react-class (.-Image react-native)))
+
+(defn image-get-size [uri callback] (.getSize (.-Image react-native) uri callback))
+
 (defn valid-source? [source]
   (or (not (map? source))
       (not (contains? source :uri))
