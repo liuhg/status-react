@@ -59,6 +59,6 @@
   (common/verify-pin
    cofx
    {:pin-step          :export-key
-    :on-card-connected :wallet.accounts/generate-new-keycard-account
+    :on-card-connected :wallet.accounts/verify-pin
     :on-success        :wallet.accounts/generate-new-keycard-account
     :on-failure        :hardwallet/new-account-pin-sheet}))

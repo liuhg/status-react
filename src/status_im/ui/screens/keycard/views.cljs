@@ -11,7 +11,9 @@
             [status-im.ui.components.topbar :as topbar]
             [status-im.ui.screens.chat.photos :as photos]
             [status-im.ui.screens.hardwallet.pin.views :as pin.views]
-            [status-im.ui.screens.keycard.styles :as styles])
+            [status-im.ui.screens.keycard.styles :as styles]
+            [status-im.ui.components.button :as button]
+            [status-im.hardwallet.login :as hardwallet.login])
   (:require-macros [status-im.utils.views :refer [defview letsubs]]))
 
 ;; NOTE(Ferossgp): Seems like it should be in popover
@@ -206,6 +208,38 @@
       [photos/photo (multiaccounts/displayed-photo account)
        {:size (if small-screen? 45 61)}])}))
 
+(defn access-is-reset []
+  [react/view
+   {:style {:flex 1
+            :align-items :center}}
+   [react/view
+    {:style {:flex 1
+             :align-items     :center
+             :justify-content :center}}
+    [react/view
+     {:style
+      {:background-color colors/green-transparent-10
+       :width            40
+       :height           40
+       :align-items      :center
+       :justify-content  :center
+       :border-radius    20}}
+     [vector-icons/icon
+      :main-icons/check
+      {:color colors/green}]]
+    [react/text "Keyacrd access is reset"]
+    [react/text "You can use this card with your new passcode"]]
+   [react/view
+    {:style {:width 160
+             :margin-bottom 15}}
+    [button/button
+     {:type            :main
+      :style           {:align-self :stretch}
+      :container-style {:height 52}
+      :label           (i18n/label :t/open)
+      :on-press        #(re-frame/dispatch
+                         [::hardwallet.login/login-after-reset])}]]])
+
 (defview login-pin []
   (letsubs [pin [:hardwallet/pin]
             enter-step [:hardwallet/pin-enter-step]
@@ -218,6 +252,15 @@
      [topbar/topbar
       {:accessories [{:icon    :main-icons/more
                       :handler #(re-frame/dispatch [:keycard.login.pin.ui/more-icon-pressed])}]
+       :content (cond
+                  (= :reset enter-step)
+                  [react/text "Reset password 1/2"]
+
+                  (= :reset-confirmation enter-step)
+                  [react/text "Reset password step 2/2"]
+
+                  (= :puk enter-step)
+                  [react/text "Enter PUK code"])
        :navigation
        {:icon                :main-icons/back
         :accessibility-label :back-button
@@ -261,14 +304,18 @@
                      :number-of-lines 1
                      :ellipsize-mode  :middle}
          name]]]
-      [pin.views/pin-view
-       {:pin                     pin
-        :retry-counter           retry-counter
-        :small-screen?           small-screen?
-        :status                  status
-        :error-label             error-label
-        :step                    enter-step
-        :save-password-checkbox? true}]
+      (if (= :after-unblocking status)
+        [access-is-reset]
+        [pin.views/pin-view
+         {:pin                     pin
+          :retry-counter           retry-counter
+          :small-screen?           small-screen?
+          :status                  status
+          :error-label             error-label
+          :step                    enter-step
+          :save-password-checkbox? (not (contains?
+                                         #{:reset :reset-confirmation :puk}
+                                         enter-step))}])
       [react/view {:margin-bottom (if small-screen? 25 32)}
        [react/touchable-highlight
         {:on-press #(re-frame/dispatch [:multiaccounts.recover.ui/recover-multiaccount-button-pressed])}

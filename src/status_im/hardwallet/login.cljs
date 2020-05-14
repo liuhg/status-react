@@ -49,16 +49,36 @@
             {:db (assoc-in db [:hardwallet :flow] :login)}
             (navigation/navigate-to-cofx :keycard-recovery-pair nil)))
 
+(fx/defn frozen-keycard-popup
+  [{:keys [db]}]
+  {:db (assoc db :popover/popover {:view :frozen-card})})
+
+(fx/defn reset-pin
+  {:events [::reset-pin]}
+  [{:keys [db] :as cofx}]
+  {:db (update-in db [:hardwallet :pin] assoc
+                  :enter-step :reset
+                  :error nil
+                  :status nil)})
+
 (fx/defn login-with-keycard
   {:events [:hardwallet/login-with-keycard]}
   [{:keys [db] :as cofx}]
-  (let [application-info       (get-in db [:hardwallet :application-info])
+  (let [{:keys [:pin-retry-counter :puk-retry-counter]
+         :as application-info}
+        (get-in db [:hardwallet :application-info])
+
         key-uid                (get-in db [:hardwallet :application-info :key-uid])
         multiaccount           (get-in db [:multiaccounts/multiaccounts (get-in db [:multiaccounts/login :key-uid])])
         multiaccount-key-uid   (get multiaccount :key-uid)
         multiaccount-mismatch? (or (nil? multiaccount)
                                    (not= multiaccount-key-uid key-uid))
         pairing                (:keycard-pairing multiaccount)]
+    (log/debug "[keycard] login-with-keycard"
+               "empty application info" (empty? application-info)
+               "no key-uid" (empty? key-uid)
+               "multiaccount-mismatch?" multiaccount-mismatch?
+               "no pairing" (empty? pairing))
     (cond
       (empty? application-info)
       (fx/merge cofx
@@ -80,10 +100,17 @@
                 (common/hide-connection-sheet)
                 (navigation/navigate-to-cofx :keycard-unpaired nil))
 
+      (and (zero? pin-retry-counter)
+           (or (nil? puk-retry-counter)
+               (= 5 puk-retry-counter)))
+      nil
+      #_(frozen-keycard-popup cofx)
+
       :else
       (common/get-keys-from-keycard cofx))))
 
 (fx/defn proceed-to-login
+  {:events [::login-after-reset]}
   [cofx]
   (log/debug "[hardwallet] proceed-to-login")
   (common/show-connection-sheet

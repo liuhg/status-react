@@ -293,6 +293,9 @@
   (let [key-uid (get-in db [:multiaccounts/login :key-uid])
         pairing (get-in db [:multiaccounts/multiaccounts key-uid :keycard-pairing])
         pin     (string/join (get-in db [:hardwallet :pin :login]))]
+    (log/debug "[keycard] get-keys-from-keycard"
+               "not nil pairing:" (boolean pairing)
+               ", not empty pin:" (boolean (seq pin)))
     (when (and pairing
                (seq pin))
       {:db                  (assoc-in db [:hardwallet :pin :status] :verifying)
@@ -344,15 +347,20 @@
     (if tag-was-lost?
       {:db (assoc-in db [:hardwallet :pin :status] nil)}
       (if (re-matches pin-mismatch-error (:error error))
-        (fx/merge cofx
-                  {:hardwallet/get-application-info {:pairing (get-pairing db key-uid)}
-                   :db                              (update-in db [:hardwallet :pin] merge {:status              :error
-                                                                                            :login               []
-                                                                                            :import-multiaccount []
-                                                                                            :error-label         :t/pin-mismatch})}
-                  (hide-connection-sheet)
-                  (when (= flow :import)
-                    (navigation/navigate-to-cofx :keycard-recovery-pin nil)))
+        (fx/merge
+         cofx
+         {:hardwallet/get-application-info
+          {:pairing (get-pairing db key-uid)}
+
+          :db
+          (update-in db [:hardwallet :pin] merge
+                     {:status              :error
+                      :login               []
+                      :import-multiaccount []
+                      :error-label         :t/pin-mismatch})}
+         (hide-connection-sheet)
+         (when (= flow :import)
+           (navigation/navigate-to-cofx :keycard-recovery-pin nil)))
         (show-wrong-keycard-alert true)))))
 
 ;; Get application info
@@ -367,6 +375,10 @@
     {:hardwallet/get-application-info {:pairing    pairing'
                                        :on-success on-card-read}}))
 
+(fx/defn frozen-keycard-popup
+  [{:keys [db]}]
+  {:db (assoc db :popover/popover {:view :frozen-card})})
+
 (fx/defn on-get-application-info-success
   {:events [:hardwallet.callback/on-get-application-info-success]}
   [{:keys [db] :as cofx} info on-success]
@@ -378,26 +390,24 @@
 
         {:keys [on-card-read]} (:hardwallet db)
         on-success' (or on-success on-card-read)
-        enter-step (if (zero? pin-retry-counter)
-                     :puk
-                     (get-in db [:hardwallet :pin :enter-step]))]
+        enter-step  (get-in db [:hardwallet :pin :enter-step])]
     (log/debug "[hardwallet] on-get-application-info-success"
                "on-success" on-success')
     (fx/merge cofx
               {:db (-> db
                        (assoc-in [:hardwallet :pin :enter-step] enter-step)
-                       (update-in [:hardwallet :pin :error-label] #(if (= :puk enter-step)
-                                                                     :t/enter-puk-code-description
-                                                                     %))
                        (assoc-in [:hardwallet :application-info] info')
                        (assoc-in [:hardwallet :application-info :applet-installed?] true)
                        (assoc-in [:hardwallet :application-info-error] nil))}
               (stash-on-card-read)
-              (if (zero? puk-retry-counter)
-                {:utils/show-popup {:title   (i18n/label :t/error)
-                                    :content (i18n/label :t/keycard-blocked)}}
-                (when on-success'
-                  (dispatch-event on-success'))))))
+              (when (zero? pin-retry-counter)
+                frozen-keycard-popup)
+              (fn [cofx]
+                (if (zero? puk-retry-counter)
+                  {:utils/show-popup {:title   (i18n/label :t/error)
+                                      :content (i18n/label :t/keycard-blocked)}}
+                  (when on-success'
+                    (dispatch-event cofx on-success')))))))
 
 (fx/defn on-get-application-info-error
   {:events [:hardwallet.callback/on-get-application-info-error]}
