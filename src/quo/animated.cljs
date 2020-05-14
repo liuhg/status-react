@@ -1,5 +1,5 @@
 (ns quo.animated
-  (:refer-clojure :exclude [set])
+  (:refer-clojure :exclude [set divide])
   (:require [reagent.core :as reagent]
             [oops.core :refer [oget ocall]]
             ["react-native-reanimated" :default animated :refer (clockRunning Easing)]
@@ -12,7 +12,9 @@
 
 (def eq (oget animated "eq"))
 (def neq (oget animated "neq"))
+(def greater (oget animated "greaterThan"))
 (def greater-or-eq (oget animated "greaterOrEq"))
+(def less-or-eq (oget animated "lessOrEq"))
 (def not* (oget animated "not"))
 (def or* (oget animated "or"))
 (def and* (oget animated "and"))
@@ -20,6 +22,7 @@
 (def add (oget animated "add"))
 (def sub (oget animated "sub"))
 (def multiply (oget animated "multiply"))
+(def divide (oget animated "divide"))
 (def abs (oget animated "abs"))
 
 (def min* (oget animated "min"))
@@ -66,13 +69,13 @@
 
 (defn cond*
   ([condition node]
-   (ocall animated "cond"
+   (.cond ^js animated
           condition
           (if (vector? node)
             (clj->js node)
             node)))
   ([condition if-node else-node]
-   (ocall animated "cond"
+   (.cond ^js animated
           condition
           (if (vector? if-node)
             (clj->js if-node)
@@ -98,7 +101,7 @@
 
 (defn spring [clock-value opts config]
   (.spring ^js animated clock-value
-         (clj->js opts) (clj->js config)))
+           (clj->js opts) (clj->js config)))
 
 (def extrapolate {:clamp (oget animated "Extrapolate" "CLAMP")})
 

@@ -39,6 +39,7 @@
    :icon-03        "rgba(255,255,255,0.4)" ; Secondary icons on accent bg
    :icon-04        "rgba(255,255,255,1)"   ; Icons inverse on accent background
    :shadow-01      "rgba(0,9,26,0.12)"     ; Main shadow color
+   :backdrop       "rgba(0,0,0,0.4)"       ; Backdrop for modals and bottom sheet
    })
 
 (def dark-theme
@@ -60,6 +61,7 @@
    :icon-02        "rgba(131,140,145,1)"
    :icon-03        "rgba(255,255,255,0.4)"
    :icon-04        "rgba(20,20,20,1)"
-   :shadow-01      "rgba(0,0,0,0.75)"})
+   :shadow-01      "rgba(0,0,0,0.75)"
+   :backdrop       "rgba(0,0,0,0.4)"})
 
 (def theme (reagent/atom light-theme))

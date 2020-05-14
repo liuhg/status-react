@@ -15,7 +15,7 @@
 
 (def touchable-opacity (reagent/adapt-react-class (.-TouchableOpacity ^js rn)))
 (def touchable-highlight (reagent/adapt-react-class (.-TouchableHighlight ^js rn)))
-
+(def touchable-without-feedback (reagent/adapt-react-class (.-TouchableWithoutFeedback ^js rn)))
 (def text-input (reagent/adapt-react-class  (.-TextInput ^js rn)))
 
 (def ui-manager  (.-UIManager ^js rn))
