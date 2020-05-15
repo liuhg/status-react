@@ -1,5 +1,5 @@
 (ns status-im.ui.screens.desktop.views
-  (:require #_[status-im.i18n :as i18n]
+  (:require [status-im.i18n :as i18n]
             [status-im.ui.components.react :as react]
             [status-im.ui.screens.desktop.main.views :as main.views]
             [status-im.ui.screens.group.views
@@ -16,14 +16,14 @@
             [status-im.ui.screens.profile.group-chat.views
              :refer
              [group-chat-profile]]
-            #_[status-im.utils.utils :as utils])
+            [status-im.utils.utils :as utils])
   (:require-macros [status-im.utils.views :as views]))
 
 (enable-console-print!)
 
 (views/defview main []
   (views/letsubs [view-id [:view-id]
-                  #_#_version [:get-app-version]]
+                  version [:get-app-version]]
     {:component-did-mount
      (fn []
        (.getValue desktop-config "desktop-alpha-warning-shown-for-version"
