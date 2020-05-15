@@ -169,8 +169,8 @@ private:
   QString m_executor = "RemoteServerConnection";
   QString m_jsExecutor = "RemoteServerConnection";
 #else
-  QString m_executor = "NodeJsExecutor";
-  QString m_jsExecutor = "NodeJsExecutor";
+  QString m_executor = "JSWebEngineExecutor";
+  QString m_jsExecutor = "JSWebEngineExecutor";
 #endif
   QVariantMap m_initialProps;
 };
